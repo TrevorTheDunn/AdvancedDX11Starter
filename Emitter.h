@@ -40,7 +40,10 @@ public:
 		DirectX::XMFLOAT2 rotationEnd = DirectX::XMFLOAT2(0, 0),
 		DirectX::XMFLOAT3 startVelocity = DirectX::XMFLOAT3(0, 1, 0),
 		DirectX::XMFLOAT3 velRandRange = DirectX::XMFLOAT3(0, 0, 0),
-		DirectX::XMFLOAT3 acceleration = DirectX::XMFLOAT3(0, 0, 0));
+		DirectX::XMFLOAT3 acceleration = DirectX::XMFLOAT3(0, 0, 0),
+		unsigned int sSheetWidth = 1,
+		unsigned int sSheetHeight = 1,
+		float sSheetSpeedScale = 1.0f);
 	~Emitter();
 
 	void Update(float dt, float currentTime);
@@ -81,6 +84,13 @@ private:
 
 	Transform transform;
 	std::shared_ptr<Material> material;
+
+	int sSheetWidth;
+	int sSheetHeight;
+	float sSheetSpeedScale;
+	float sSheetFrameW;
+	float sSheetFrameH;
+	bool IsSpriteSheet();
 
 	void CreateParticlesAndGPUResources();
 	void CopyParticlesToGPU(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context);

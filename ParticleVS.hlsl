@@ -24,6 +24,12 @@ cbuffer externalData : register(b0)
 	float startSize;
 	float endSize;
 	float lifetime;
+	float sSheetSpeedScale;
+
+	int sSheetWidth;
+	int sSheetHeight;
+	float sSheetFrameW;
+	float sSheetFrameH;
 }
 
 StructuredBuffer<Particle> ParticleData : register(t0);
@@ -81,11 +87,20 @@ VertexToPixel main(uint id : SV_VertexID)
 	matrix viewProj = mul(projection, view);
 	output.position = mul(viewProj, float4(pos, 1.0f));
 
+	float aPerc = fmod(agePercent * sSheetSpeedScale, 1.0f);
+	uint sSheetIndex = (uint)floor(aPerc * (sSheetWidth * sSheetHeight));
+
+	uint uIndex = sSheetIndex % sSheetWidth;
+	uint vIndex = sSheetIndex / sSheetWidth;
+
+	float u = uIndex / (float)sSheetWidth;
+	float v = vIndex / (float)sSheetHeight;
+
 	float2 uvs[4];
-	uvs[0] = float2(0, 0); // Top Left
-	uvs[1] = float2(1, 0); // Top Right
-	uvs[2] = float2(1, 1); // Bottom Right
-	uvs[3] = float2(0, 1); // Bottom Left
+	uvs[0] = float2(u, v);								 // Top Left
+	uvs[1] = float2(u + sSheetFrameW, v);				 // Top Right
+	uvs[2] = float2(u + sSheetFrameW, v + sSheetFrameH); // Bottom Right
+	uvs[3] = float2(u, v + sSheetFrameH);				 // Bottom Left
 	output.uv = saturate(uvs[cornerID]);
 
 	output.colorTint = lerp(startColor, endColor, agePercent);

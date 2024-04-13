@@ -932,6 +932,12 @@ void Game::SetupParticles()
 	LoadTexture(L"../../Assets/Particles/Transparent/twirl_02.png", twirl);
 	twirlParticle->AddTextureSRV("Particle", twirl);
 
+	std::shared_ptr<Material> animatedFire = std::make_shared<Material>(particlePS, particleVS, XMFLOAT3(1, 1, 1));
+	animatedFire->AddSampler("BasicSampler", samplerOptions);
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> animated;
+	LoadTexture(L"../../Assets/Particles/flame_animated.png", animated);
+	animatedFire->AddTextureSRV("Particle", animated);
+
 	D3D11_DEPTH_STENCIL_DESC particleDepthDesc = {};
 	particleDepthDesc.DepthEnable = true;
 	particleDepthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
@@ -994,6 +1000,27 @@ void Game::SetupParticles()
 		XMFLOAT3(0, 0, 0),					// Start Velocity
 		XMFLOAT3(0, 0, 0),					// Velocity random range
 		XMFLOAT3(0, 0, 0)));				// Constant acceleration
+
+	// Animated (Sprite Sheet) Emitter
+	emitters.push_back(std::make_shared<Emitter>(
+		device,
+		animatedFire,
+		5,									// Max particles
+		2,									// Particles/second
+		2.0f,								// Lifetime
+		2.0f,								// Start size
+		2.0f,								// End size
+		XMFLOAT4(1, 1, 1, 1),				// Start Color
+		XMFLOAT4(1, 1, 1, 0),				// End Color
+		XMFLOAT3(2, -2, -2),				// Position
+		XMFLOAT3(0, 0, 0),					// Position random range
+		XMFLOAT2(0, 0),						// RotationStart
+		XMFLOAT2(0, 0),						// RotationEnd
+		XMFLOAT3(0, 0, 0),					// Start Velocity
+		XMFLOAT3(0, 0, 0),					// Velocity random range
+		XMFLOAT3(0, 0, 0),					// Constant acceleration
+		8,									// Width of Sprite Sheet
+		8));								// Height of Sprite Sheet
 }
 
 void Game::DrawParticles(float totalTime)

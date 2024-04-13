@@ -18,7 +18,10 @@ Emitter::Emitter(
 	DirectX::XMFLOAT2 rotationEnd,
 	DirectX::XMFLOAT3 startVelocity,
 	DirectX::XMFLOAT3 velRandRange,
-	DirectX::XMFLOAT3 acceleration) : 
+	DirectX::XMFLOAT3 acceleration,
+	unsigned int sSheetWidth,
+	unsigned int sSheetHeight,
+	float sSheetSpeedScale) : 
 	device(device), material(material),
 	maxParticles(maxParticles),
 	particlesPerSecond(particlesPerSecond),
@@ -32,7 +35,10 @@ Emitter::Emitter(
 	posRandRange(posRandRange),
 	velRandRange(velRandRange),
 	rotationStart(rotationStart),
-	rotationEnd(rotationEnd)
+	rotationEnd(rotationEnd),
+	sSheetWidth(sSheetWidth),
+	sSheetHeight(sSheetHeight),
+	sSheetSpeedScale(sSheetSpeedScale)
 {
 	secondsPerParticle = 1.0f / particlesPerSecond;
 
@@ -42,6 +48,9 @@ Emitter::Emitter(
 	firstDeadIndex = 0;
 
 	this->transform.SetPosition(position);
+
+	this->sSheetFrameH = 1.0f / sSheetHeight;
+	this->sSheetFrameW = 1.0f / sSheetWidth;
 
 	CreateParticlesAndGPUResources();
 }
@@ -106,6 +115,11 @@ void Emitter::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::sha
 	vs->SetFloat("startSize", startSize);
 	vs->SetFloat("endSize", endSize);
 	vs->SetFloat("lifetime", maxLifetime);
+	vs->SetFloat("sSheetSpeedScale", sSheetSpeedScale);
+	vs->SetInt("sSheetWidth", sSheetWidth);
+	vs->SetInt("sSheetHeight", sSheetHeight);
+	vs->SetFloat("sSheetFrameW", sSheetFrameW);
+	vs->SetFloat("sSheetFrameH", sSheetFrameH);
 	vs->CopyAllBufferData();
 
 	vs->SetShaderResourceView("ParticleData", particleDataSRV);
@@ -115,6 +129,7 @@ void Emitter::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::sha
 
 int Emitter::GetMaxParticles() { return maxParticles; }
 void Emitter::SetMaxParticles(int maxParticles) { this->maxParticles = maxParticles; }
+bool Emitter::IsSpriteSheet() { return sSheetHeight > 1 || sSheetWidth > 1; }
 
 void Emitter::CreateParticlesAndGPUResources()
 {
