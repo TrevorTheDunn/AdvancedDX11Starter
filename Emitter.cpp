@@ -1,16 +1,34 @@
 #include "Emitter.h"
 
+#define RandomRange(min, max) ((float)rand() / RAND_MAX * (max - min) + min)
+
 Emitter::Emitter(
 	Microsoft::WRL::ComPtr<ID3D11Device> device,
 	std::shared_ptr<Material> material,
 	int maxParticles,
 	int particlesPerSecond,
 	float maxLifetime,
-	DirectX::XMFLOAT3 position) : 
+	float startSize,
+	float endSize,
+	DirectX::XMFLOAT4 startColor,
+	DirectX::XMFLOAT4 endColor,
+	DirectX::XMFLOAT3 position,
+	DirectX::XMFLOAT3 posRandRange,
+	DirectX::XMFLOAT3 startVelocity,
+	DirectX::XMFLOAT3 velRandRange,
+	DirectX::XMFLOAT3 acceleration) : 
 	device(device), material(material),
 	maxParticles(maxParticles),
 	particlesPerSecond(particlesPerSecond),
-	maxLifetime(maxLifetime)
+	maxLifetime(maxLifetime),
+	startSize(startSize),
+	endSize(endSize),
+	startColor(startColor),
+	endColor(endColor),
+	startVelocity(startVelocity),
+	acceleration(acceleration),
+	posRandRange(posRandRange),
+	velRandRange(velRandRange)
 {
 	secondsPerParticle = 1.0f / particlesPerSecond;
 
@@ -28,14 +46,16 @@ Emitter::~Emitter() { delete[] particles; }
 
 void Emitter::Update(float dt, float currentTime)
 {
+	// Checks if there's even particles to update
 	if (currentlyLiving > 0)
 	{
+		// Alive particles are all before dead particles
 		if (firstAliveIndex < firstDeadIndex)
 		{
 			for (int i = firstAliveIndex; i < firstDeadIndex; i++)
 				UpdateSingleParticle(currentTime, i);
 		}
-
+		// Alive particles are broken up due to wrap
 		else if (firstDeadIndex < firstAliveIndex)
 		{
 			for (int i = firstAliveIndex; i < maxParticles; i++)
@@ -44,7 +64,7 @@ void Emitter::Update(float dt, float currentTime)
 			for (int i = 0; i < firstDeadIndex; i++)
 				UpdateSingleParticle(currentTime, i);
 		}
-
+		// Particles are all alive
 		else
 		{
 			for (int i = 0; i < maxParticles; i++)
@@ -53,7 +73,6 @@ void Emitter::Update(float dt, float currentTime)
 	}
 
 	timeSinceLastEmit += dt;
-
 	while (timeSinceLastEmit > secondsPerParticle)
 	{
 		EmitParticle(currentTime);
@@ -76,8 +95,13 @@ void Emitter::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::sha
 	std::shared_ptr<SimpleVertexShader> vs = material->GetVertexShader();
 	vs->SetMatrix4x4("view", camera->GetView());
 	vs->SetMatrix4x4("projection", camera->GetProjection());
+	vs->SetFloat4("startColor", startColor);
+	vs->SetFloat4("endColor", endColor);
 	vs->SetFloat("currentTime", currentTime);
-	vs->SetFloat3("particleColor", DirectX::XMFLOAT3(1, 0, 0));
+	vs->SetFloat3("acceleration", acceleration);
+	vs->SetFloat("startSize", startSize);
+	vs->SetFloat("endSize", endSize);
+	vs->SetFloat("lifetime", maxLifetime);
 	vs->CopyAllBufferData();
 
 	vs->SetShaderResourceView("ParticleData", particleDataSRV);
@@ -92,6 +116,7 @@ void Emitter::CreateParticlesAndGPUResources()
 {
 	particles = new Particle[maxParticles];
 
+	// Create array of indices
 	int numIndices = maxParticles * 6;
 	unsigned int* indices = new unsigned int[numIndices];
 	int indexCount = 0;
@@ -104,6 +129,8 @@ void Emitter::CreateParticlesAndGPUResources()
 		indices[indexCount++] = i + 2;
 		indices[indexCount++] = i + 3;
 	}
+
+	// Use array of indices to create an index buffer
 	D3D11_SUBRESOURCE_DATA indexData = {};
 	indexData.pSysMem = indices;
 
@@ -113,8 +140,9 @@ void Emitter::CreateParticlesAndGPUResources()
 	ibDesc.Usage = D3D11_USAGE_DEFAULT;
 	ibDesc.ByteWidth = sizeof(unsigned int) * maxParticles * 6;
 	device->CreateBuffer(&ibDesc, &indexData, indexBuffer.GetAddressOf());
-	delete[] indices;
+	delete[] indices; // delete indices as we are finished with them
 
+	// Buffer for particle data on GPU
 	D3D11_BUFFER_DESC desc = {};
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -124,6 +152,7 @@ void Emitter::CreateParticlesAndGPUResources()
 	desc.ByteWidth = sizeof(Particle) * maxParticles;
 	device->CreateBuffer(&desc, 0, particleDataBuffer.GetAddressOf());
 
+	// Create structured buffer
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
 	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
@@ -184,6 +213,14 @@ void Emitter::EmitParticle(float currentTime)
 	particles[firstDeadIndex].EmitTime = currentTime;
 
 	particles[firstDeadIndex].StartPos = transform.GetPosition();
+	particles[firstDeadIndex].StartPos.x += posRandRange.x * RandomRange(-1.0f, 1.0f);
+	particles[firstDeadIndex].StartPos.y += posRandRange.y * RandomRange(-1.0f, 1.0f);
+	particles[firstDeadIndex].StartPos.z += posRandRange.z * RandomRange(-1.0f, 1.0f);
+
+	particles[firstDeadIndex].StartVel = startVelocity;
+	particles[firstDeadIndex].StartVel.x += velRandRange.x * RandomRange(-1.0f, 1.0f);
+	particles[firstDeadIndex].StartVel.y += velRandRange.y * RandomRange(-1.0f, 1.0f);
+	particles[firstDeadIndex].StartVel.z += velRandRange.z * RandomRange(-1.0f, 1.0f);
 
 	firstDeadIndex++;
 	firstDeadIndex %= maxParticles;

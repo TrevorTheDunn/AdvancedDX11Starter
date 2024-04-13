@@ -13,14 +13,28 @@ struct Particle
 {
 	float EmitTime;
 	DirectX::XMFLOAT3 StartPos;
+
+	DirectX::XMFLOAT3 StartVel;
 };
 
 class Emitter
 {
 public:
-	Emitter(Microsoft::WRL::ComPtr<ID3D11Device> device, 
-		std::shared_ptr<Material> material, int maxParticles,
-		int particlesPerSecond, float maxLifetime, DirectX::XMFLOAT3 position);
+	Emitter(
+		Microsoft::WRL::ComPtr<ID3D11Device> device,
+		std::shared_ptr<Material> material,
+		int maxParticles,
+		int particlesPerSecond,
+		float maxLifetime,
+		float startSize = 1.0f,
+		float endSize = 2.0f,
+		DirectX::XMFLOAT4 startColor = DirectX::XMFLOAT4(1, 1, 1, 1),
+		DirectX::XMFLOAT4 endColor = DirectX::XMFLOAT4(1, 1, 1, 1),
+		DirectX::XMFLOAT3 position = DirectX::XMFLOAT3(0, 1, 0),
+		DirectX::XMFLOAT3 posRandRange = DirectX::XMFLOAT3(0, 0, 0),
+		DirectX::XMFLOAT3 startVelocity = DirectX::XMFLOAT3(0, 1, 0),
+		DirectX::XMFLOAT3 velRandRange = DirectX::XMFLOAT3(0, 0, 0),
+		DirectX::XMFLOAT3 acceleration = DirectX::XMFLOAT3(0, 0, 0));
 	~Emitter();
 
 	void Update(float dt, float currentTime);
@@ -46,6 +60,16 @@ private:
 	float secondsPerParticle;
 	float timeSinceLastEmit;
 	float maxLifetime;
+
+	float startSize;
+	float endSize;
+	DirectX::XMFLOAT4 startColor;
+	DirectX::XMFLOAT4 endColor;
+	DirectX::XMFLOAT3 startVelocity;
+	DirectX::XMFLOAT3 acceleration;
+
+	DirectX::XMFLOAT3 posRandRange;
+	DirectX::XMFLOAT3 velRandRange;
 
 	Transform transform;
 	std::shared_ptr<Material> material;

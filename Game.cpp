@@ -923,7 +923,7 @@ void Game::SetupParticles()
 	std::shared_ptr<Material> fireParticle = std::make_shared<Material>(particlePS, particleVS, XMFLOAT3(1, 1, 1));
 	fireParticle->AddSampler("BasicSampler", samplerOptions);
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> fire;
-	LoadTexture(L"../../Assets/Particles/Transparent/fire_02.png", fire);
+	LoadTexture(L"../../Assets/Particles/Black/fire_01.png", fire);
 	fireParticle->AddTextureSRV("Particle", fire);
 
 	D3D11_DEPTH_STENCIL_DESC particleDepthDesc = {};
@@ -951,13 +951,29 @@ void Game::SetupParticles()
 	rd.FillMode = D3D11_FILL_WIREFRAME;
 	device->CreateRasterizerState(&rd, particleDebugRasterState.GetAddressOf());
 
-	emitters.push_back(std::make_shared<Emitter>(
+	/*emitters.push_back(std::make_shared<Emitter>(
 		device,
 		fireParticle,
 		160,
 		30,
 		5.0f,
-		XMFLOAT3(2, 0, 0)));
+		XMFLOAT3(2, 0, 0)));*/
+
+	emitters.push_back(std::make_shared<Emitter>(
+		device,
+		fireParticle,
+		160,								// Max particles
+		30,									// Particles/second
+		5.0f,								// Lifetime
+		1.0f,								// Start size
+		2.0f,								// End size
+		XMFLOAT4(1, 0.1f, 0.1f, 0.7f),		// Start Color
+		XMFLOAT4(1, 0.6f, 0.1f, 0),			// End Color
+		XMFLOAT3(2, 0, 0),					// Position
+		XMFLOAT3(0.1f, 0.1f, 0.1f),			// Position random range
+		XMFLOAT3(-2, 2, 0),					// Start Velocity
+		XMFLOAT3(0.2f, 0.2f, 0.2f),			// Velocity random range
+		XMFLOAT3(0, -1, 0)));				// Constant acceleration
 }
 
 void Game::DrawParticles(float totalTime)
