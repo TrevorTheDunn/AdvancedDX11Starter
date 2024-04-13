@@ -405,6 +405,8 @@ void Game::LoadAssetsAndCreateEntities()
 	lightMesh = sphereMesh;
 	lightVS = vertexShader;
 	lightPS = solidColorPS;
+
+	SetupParticles();
 }
 
 
@@ -487,6 +489,9 @@ void Game::Update(float deltaTime, float totalTime)
 	// Update the camera
 	camera->Update(deltaTime);
 
+	for (auto& e : emitters)
+		e->Update(deltaTime, totalTime);
+
 	// Check individual input
 	Input& input = Input::GetInstance();
 	if (input.KeyDown(VK_ESCAPE)) Quit();
@@ -535,6 +540,8 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	// Draw the sky
 	sky->Draw(camera);
+
+	DrawParticles(totalTime);
 
 	// Frame END
 	// - These should happen exactly ONCE PER FRAME
@@ -908,4 +915,62 @@ void Game::LightUI(Light& light)
 	ImGui::SliderFloat("Intensity", &light.Intensity, 0.0f, 10.0f);
 }
 
+void Game::SetupParticles()
+{
+	std::shared_ptr<SimpleVertexShader> particleVS = LoadShader(SimpleVertexShader, L"ParticleVS.cso");
+	std::shared_ptr<SimplePixelShader> particlePS = LoadShader(SimplePixelShader, L"ParticlePS.cso");
 
+	std::shared_ptr<Material> fireParticle = std::make_shared<Material>(particlePS, particleVS, XMFLOAT3(1, 1, 1));
+	fireParticle->AddSampler("BasicSampler", samplerOptions);
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> fire;
+	LoadTexture(L"../../Assets/Particles/Transparent/fire_02.png", fire);
+	fireParticle->AddTextureSRV("Particle", fire);
+
+	D3D11_DEPTH_STENCIL_DESC particleDepthDesc = {};
+	particleDepthDesc.DepthEnable = true;
+	particleDepthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	particleDepthDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	device->CreateDepthStencilState(&particleDepthDesc, particleDepthState.GetAddressOf());
+
+	additive = true;
+
+	D3D11_BLEND_DESC blendDesc = {};
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlend = additive ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = additive ? D3D11_BLEND_ONE : D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	device->CreateBlendState(&blendDesc, particleBlendState.GetAddressOf());
+
+	D3D11_RASTERIZER_DESC rd = {};
+	rd.CullMode = D3D11_CULL_BACK;
+	rd.DepthClipEnable = true;
+	rd.FillMode = D3D11_FILL_WIREFRAME;
+	device->CreateRasterizerState(&rd, particleDebugRasterState.GetAddressOf());
+
+	emitters.push_back(std::make_shared<Emitter>(
+		device,
+		fireParticle,
+		160,
+		30,
+		5.0f,
+		XMFLOAT3(2, 0, 0)));
+}
+
+void Game::DrawParticles(float totalTime)
+{
+	context->OMSetBlendState(particleBlendState.Get(), 0, 0xffffffff);
+	context->OMSetDepthStencilState(particleDepthState.Get(), 0);
+
+	for (auto& e : emitters)
+	{
+		e->Draw(context, camera, totalTime);
+	}
+
+	context->OMSetBlendState(0, 0, 0xffffffff);
+	context->OMSetDepthStencilState(0, 0);
+	context->RSSetState(0);
+}

@@ -78,6 +78,9 @@
     <ClCompile Include="ImGui\imgui_impl_dx11.cpp">
       <Filter>ImGui</Filter>
     </ClCompile>
+    <ClCompile Include="Emitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vertex.h">
@@ -143,12 +146,15 @@
     <ClInclude Include="ImGui\imgui_impl_dx11.h">
       <Filter>ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="Emitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="Lighting.hlsli">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
@@ -167,6 +173,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="SkyVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="ParticlePS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="ParticleVS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
