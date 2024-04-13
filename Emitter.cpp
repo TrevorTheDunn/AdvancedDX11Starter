@@ -14,6 +14,8 @@ Emitter::Emitter(
 	DirectX::XMFLOAT4 endColor,
 	DirectX::XMFLOAT3 position,
 	DirectX::XMFLOAT3 posRandRange,
+	DirectX::XMFLOAT2 rotationStart,
+	DirectX::XMFLOAT2 rotationEnd,
 	DirectX::XMFLOAT3 startVelocity,
 	DirectX::XMFLOAT3 velRandRange,
 	DirectX::XMFLOAT3 acceleration) : 
@@ -28,7 +30,9 @@ Emitter::Emitter(
 	startVelocity(startVelocity),
 	acceleration(acceleration),
 	posRandRange(posRandRange),
-	velRandRange(velRandRange)
+	velRandRange(velRandRange),
+	rotationStart(rotationStart),
+	rotationEnd(rotationEnd)
 {
 	secondsPerParticle = 1.0f / particlesPerSecond;
 
@@ -221,6 +225,9 @@ void Emitter::EmitParticle(float currentTime)
 	particles[firstDeadIndex].StartVel.x += velRandRange.x * RandomRange(-1.0f, 1.0f);
 	particles[firstDeadIndex].StartVel.y += velRandRange.y * RandomRange(-1.0f, 1.0f);
 	particles[firstDeadIndex].StartVel.z += velRandRange.z * RandomRange(-1.0f, 1.0f);
+
+	particles[firstDeadIndex].StartRotation = RandomRange(rotationStart.x, rotationStart.y);
+	particles[firstDeadIndex].EndRotation = RandomRange(rotationEnd.x, rotationEnd.y);
 
 	firstDeadIndex++;
 	firstDeadIndex %= maxParticles;

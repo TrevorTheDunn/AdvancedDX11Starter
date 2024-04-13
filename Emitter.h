@@ -15,6 +15,10 @@ struct Particle
 	DirectX::XMFLOAT3 StartPos;
 
 	DirectX::XMFLOAT3 StartVel;
+	float StartRotation;
+
+	float EndRotation;
+	DirectX::XMFLOAT3 padding;
 };
 
 class Emitter
@@ -32,6 +36,8 @@ public:
 		DirectX::XMFLOAT4 endColor = DirectX::XMFLOAT4(1, 1, 1, 1),
 		DirectX::XMFLOAT3 position = DirectX::XMFLOAT3(0, 1, 0),
 		DirectX::XMFLOAT3 posRandRange = DirectX::XMFLOAT3(0, 0, 0),
+		DirectX::XMFLOAT2 rotationStart = DirectX::XMFLOAT2(0, 0),
+		DirectX::XMFLOAT2 rotationEnd = DirectX::XMFLOAT2(0, 0),
 		DirectX::XMFLOAT3 startVelocity = DirectX::XMFLOAT3(0, 1, 0),
 		DirectX::XMFLOAT3 velRandRange = DirectX::XMFLOAT3(0, 0, 0),
 		DirectX::XMFLOAT3 acceleration = DirectX::XMFLOAT3(0, 0, 0));
@@ -70,6 +76,8 @@ private:
 
 	DirectX::XMFLOAT3 posRandRange;
 	DirectX::XMFLOAT3 velRandRange;
+	DirectX::XMFLOAT2 rotationStart;
+	DirectX::XMFLOAT2 rotationEnd;
 
 	Transform transform;
 	std::shared_ptr<Material> material;

@@ -4,6 +4,10 @@ struct Particle
 	float3 StartPos;
 
 	float3 StartVel;
+	float StartRotation;
+
+	float EndRotation;
+	float3 padding;
 };
 
 cbuffer externalData : register(b0)
@@ -58,10 +62,20 @@ VertexToPixel main(uint id : SV_VertexID)
 	offsets[2] = float2(+1.0f, -1.0f); // Bottom Right
 	offsets[3] = float2(-1.0f, -1.0f); // Bottom Left
 
+	float s, c, rotation = lerp(p.StartRotation, p.EndRotation, agePercent);
+	sincos(rotation, s, c);
+	float2x2 rot =
+	{
+		c, s,
+		-s, c
+	};
+
+	float2 rotOffset = mul(offsets[cornerID], rot) * size;
+
 	// Billboarding!
 	// Offset the position based on the camera's right and up vectors
-	pos += float3(view._11, view._12, view._13) * offsets[cornerID].x; // RIGHT
-	pos += float3(view._21, view._22, view._23) * offsets[cornerID].y; // UP
+	pos += float3(view._11, view._12, view._13) * rotOffset.x; // RIGHT
+	pos += float3(view._21, view._22, view._23) * rotOffset.y; // UP
 
 	// Finally, calculate output position here using View and Projection matrices
 	matrix viewProj = mul(projection, view);

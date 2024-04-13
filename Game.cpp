@@ -539,7 +539,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		DrawPointLights();
 
 	// Draw the sky
-	sky->Draw(camera);
+	//sky->Draw(camera);
 
 	DrawParticles(totalTime);
 
@@ -923,8 +923,14 @@ void Game::SetupParticles()
 	std::shared_ptr<Material> fireParticle = std::make_shared<Material>(particlePS, particleVS, XMFLOAT3(1, 1, 1));
 	fireParticle->AddSampler("BasicSampler", samplerOptions);
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> fire;
-	LoadTexture(L"../../Assets/Particles/Black/fire_01.png", fire);
+	LoadTexture(L"../../Assets/Particles/Transparent/fire_01.png", fire);
 	fireParticle->AddTextureSRV("Particle", fire);
+
+	std::shared_ptr<Material> twirlParticle = std::make_shared<Material>(particlePS, particleVS, XMFLOAT3(1, 1, 1));
+	twirlParticle->AddSampler("BasicSampler", samplerOptions);
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> twirl;
+	LoadTexture(L"../../Assets/Particles/Transparent/twirl_02.png", twirl);
+	twirlParticle->AddTextureSRV("Particle", twirl);
 
 	D3D11_DEPTH_STENCIL_DESC particleDepthDesc = {};
 	particleDepthDesc.DepthEnable = true;
@@ -951,14 +957,7 @@ void Game::SetupParticles()
 	rd.FillMode = D3D11_FILL_WIREFRAME;
 	device->CreateRasterizerState(&rd, particleDebugRasterState.GetAddressOf());
 
-	/*emitters.push_back(std::make_shared<Emitter>(
-		device,
-		fireParticle,
-		160,
-		30,
-		5.0f,
-		XMFLOAT3(2, 0, 0)));*/
-
+	// Fire Emitter
 	emitters.push_back(std::make_shared<Emitter>(
 		device,
 		fireParticle,
@@ -966,14 +965,35 @@ void Game::SetupParticles()
 		30,									// Particles/second
 		5.0f,								// Lifetime
 		1.0f,								// Start size
-		2.0f,								// End size
+		0.5f,								// End size
 		XMFLOAT4(1, 0.1f, 0.1f, 0.7f),		// Start Color
 		XMFLOAT4(1, 0.6f, 0.1f, 0),			// End Color
 		XMFLOAT3(2, 0, 0),					// Position
 		XMFLOAT3(0.1f, 0.1f, 0.1f),			// Position random range
+		XMFLOAT2(0, 0),						// RotationStart
+		XMFLOAT2(0, 0),						// RotationEnd
 		XMFLOAT3(-2, 2, 0),					// Start Velocity
 		XMFLOAT3(0.2f, 0.2f, 0.2f),			// Velocity random range
 		XMFLOAT3(0, -1, 0)));				// Constant acceleration
+
+	// Twirl Emitter
+	emitters.push_back(std::make_shared<Emitter>(
+		device,
+		twirlParticle,
+		45,									// Max particles
+		20,									// Particles/second
+		2.0f,								// Lifetime
+		3.0f,								// Start size
+		2.0f,								// End size
+		XMFLOAT4(0.2f, 0.7f, 0.1f, 0.0f),	// Start Color
+		XMFLOAT4(0.2f, 0.7f, 0.1f, 1.0f),	// End Color
+		XMFLOAT3(3.5f, 3.5f, 0),			// Position
+		XMFLOAT3(0, 0, 0),					// Position random range
+		XMFLOAT2(-5, 5),					// RotationStart
+		XMFLOAT2(-5, 5),					// RotationEnd
+		XMFLOAT3(0, 0, 0),					// Start Velocity
+		XMFLOAT3(0, 0, 0),					// Velocity random range
+		XMFLOAT3(0, 0, 0)));				// Constant acceleration
 }
 
 void Game::DrawParticles(float totalTime)
