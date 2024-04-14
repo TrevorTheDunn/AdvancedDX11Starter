@@ -81,7 +81,8 @@ VertexToPixel main(uint id : SV_VertexID)
 	// Billboarding!
 	// Offset the position based on the camera's right and up vectors
 	pos += float3(view._11, view._12, view._13) * rotOffset.x; // RIGHT
-	pos += float3(view._21, view._22, view._23) * rotOffset.y; // UP
+	//pos += float3(view._21, view._22, view._23) * rotOffset.y; // UP
+	pos += float3(0, 1, 0) * rotOffset.y;
 
 	// Finally, calculate output position here using View and Projection matrices
 	matrix viewProj = mul(projection, view);

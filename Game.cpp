@@ -539,7 +539,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		DrawPointLights();
 
 	// Draw the sky
-	//sky->Draw(camera);
+	sky->Draw(camera);
 
 	DrawParticles(totalTime);
 
@@ -967,20 +967,20 @@ void Game::SetupParticles()
 	emitters.push_back(std::make_shared<Emitter>(
 		device,
 		fireParticle,
-		160,								// Max particles
-		30,									// Particles/second
-		5.0f,								// Lifetime
-		1.0f,								// Start size
-		0.5f,								// End size
-		XMFLOAT4(1, 0.1f, 0.1f, 0.7f),		// Start Color
-		XMFLOAT4(1, 0.6f, 0.1f, 0),			// End Color
-		XMFLOAT3(2, 0, 0),					// Position
-		XMFLOAT3(0.1f, 0.1f, 0.1f),			// Position random range
+		240,								// Max particles
+		40,									// Particles/second
+		4.0f,								// Lifetime
+		0.5f,								// Start size
+		0.0f,								// End size
+		XMFLOAT4(0.1f, 0.17f, 0.21f, 1.0f),	// Start Color
+		XMFLOAT4(0.1f, 0.17f, 0.21f, 0),	// End Color
+		XMFLOAT3(2, -2, -2),				// Position
+		XMFLOAT3(0.5f, 0.1f, 0.1f),			// Position random range
 		XMFLOAT2(0, 0),						// RotationStart
 		XMFLOAT2(0, 0),						// RotationEnd
-		XMFLOAT3(-2, 2, 0),					// Start Velocity
+		XMFLOAT3(0, 2, 0),					// Start Velocity
 		XMFLOAT3(0.2f, 0.2f, 0.2f),			// Velocity random range
-		XMFLOAT3(0, -1, 0)));				// Constant acceleration
+		XMFLOAT3(0, 1, 0)));				// Constant acceleration
 
 	// Twirl Emitter
 	emitters.push_back(std::make_shared<Emitter>(
@@ -989,11 +989,11 @@ void Game::SetupParticles()
 		45,									// Max particles
 		20,									// Particles/second
 		2.0f,								// Lifetime
-		3.0f,								// Start size
-		2.0f,								// End size
-		XMFLOAT4(0.2f, 0.7f, 0.1f, 0.0f),	// Start Color
-		XMFLOAT4(0.2f, 0.7f, 0.1f, 1.0f),	// End Color
-		XMFLOAT3(3.5f, 3.5f, 0),			// Position
+		1.0f,								// Start size
+		3.0f,								// End size
+		XMFLOAT4(0.7f, 0.2f, 0.1f, 0.0f),	// Start Color
+		XMFLOAT4(0.7f, 0.2f, 0.1f, 1.0f),	// End Color
+		XMFLOAT3(7.0f, 0.0f, -3.0f),		// Position
 		XMFLOAT3(0, 0, 0),					// Position random range
 		XMFLOAT2(-5, 5),					// RotationStart
 		XMFLOAT2(-5, 5),					// RotationEnd
@@ -1014,8 +1014,8 @@ void Game::SetupParticles()
 		XMFLOAT4(1, 1, 1, 0),				// End Color
 		XMFLOAT3(2, -2, -2),				// Position
 		XMFLOAT3(0, 0, 0),					// Position random range
-		XMFLOAT2(0, 0),						// RotationStart
-		XMFLOAT2(0, 0),						// RotationEnd
+		XMFLOAT2(0, 2),						// RotationStart
+		XMFLOAT2(0, 2),						// RotationEnd
 		XMFLOAT3(0, 0, 0),					// Start Velocity
 		XMFLOAT3(0, 0, 0),					// Velocity random range
 		XMFLOAT3(0, 0, 0),					// Constant acceleration
