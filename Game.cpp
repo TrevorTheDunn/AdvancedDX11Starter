@@ -539,7 +539,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		DrawPointLights();
 
 	// Draw the sky
-	sky->Draw(camera);
+	//sky->Draw(camera);
 
 	DrawParticles(totalTime);
 
@@ -920,16 +920,16 @@ void Game::SetupParticles()
 	std::shared_ptr<SimpleVertexShader> particleVS = LoadShader(SimpleVertexShader, L"ParticleVS.cso");
 	std::shared_ptr<SimplePixelShader> particlePS = LoadShader(SimplePixelShader, L"ParticlePS.cso");
 
-	std::shared_ptr<Material> fireParticle = std::make_shared<Material>(particlePS, particleVS, XMFLOAT3(1, 1, 1));
-	fireParticle->AddSampler("BasicSampler", samplerOptions);
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> fire;
-	LoadTexture(L"../../Assets/Particles/Transparent/fire_01.png", fire);
-	fireParticle->AddTextureSRV("Particle", fire);
+	std::shared_ptr<Material> smokeParticle = std::make_shared<Material>(particlePS, particleVS, XMFLOAT3(1, 1, 1));
+	smokeParticle->AddSampler("BasicSampler", samplerOptions);
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> smoke;
+	LoadTexture(L"../../Assets/Particles/Transparent/smoke_04.png", smoke);
+	smokeParticle->AddTextureSRV("Particle", smoke);
 
 	std::shared_ptr<Material> twirlParticle = std::make_shared<Material>(particlePS, particleVS, XMFLOAT3(1, 1, 1));
 	twirlParticle->AddSampler("BasicSampler", samplerOptions);
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> twirl;
-	LoadTexture(L"../../Assets/Particles/Transparent/twirl_02.png", twirl);
+	LoadTexture(L"../../Assets/Particles/Transparent/twirl_01.png", twirl);
 	twirlParticle->AddTextureSRV("Particle", twirl);
 
 	std::shared_ptr<Material> animatedFire = std::make_shared<Material>(particlePS, particleVS, XMFLOAT3(1, 1, 1));
@@ -963,10 +963,10 @@ void Game::SetupParticles()
 	rd.FillMode = D3D11_FILL_WIREFRAME;
 	device->CreateRasterizerState(&rd, particleDebugRasterState.GetAddressOf());
 
-	// Fire Emitter
+	// Smoke Emitter
 	emitters.push_back(std::make_shared<Emitter>(
 		device,
-		fireParticle,
+		smokeParticle,
 		240,								// Max particles
 		40,									// Particles/second
 		4.0f,								// Lifetime
@@ -986,11 +986,11 @@ void Game::SetupParticles()
 	emitters.push_back(std::make_shared<Emitter>(
 		device,
 		twirlParticle,
-		45,									// Max particles
-		20,									// Particles/second
-		2.0f,								// Lifetime
+		50,									// Max particles
+		10,									// Particles/second
+		4.0f,								// Lifetime
 		1.0f,								// Start size
-		3.0f,								// End size
+		2.5f,								// End size
 		XMFLOAT4(0.7f, 0.2f, 0.1f, 0.0f),	// Start Color
 		XMFLOAT4(0.7f, 0.2f, 0.1f, 1.0f),	// End Color
 		XMFLOAT3(7.0f, 0.0f, -3.0f),		// Position
